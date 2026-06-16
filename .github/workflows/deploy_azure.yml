@@ -1,0 +1,64 @@
+name: Build Test Deploy KTAS to Azure
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  PYTHON_VERSION: "3.11"
+  # Change this if your Azure App Service has a different name.
+  AZURE_WEBAPP_NAME: "edtriagesupportworkflowktas"
+
+jobs:
+  build-test-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip check
+
+      - name: Run KTAS data/model pipeline
+        run: |
+          python scripts/run_ktas_pipeline.py
+
+      - name: Run Azure preflight check
+        run: |
+          python scripts/azure_preflight_check.py
+
+      - name: Run tests
+        run: |
+          pytest
+
+      - name: Package application
+        run: |
+          zip -r release.zip . \
+            -x ".git/*" \
+            -x ".github/*" \
+            -x ".venv/*" \
+            -x "venv/*" \
+            -x "__pycache__/*" \
+            -x "*.pyc" \
+            -x ".env" \
+            -x ".pytest_cache/*" \
+            -x "htmlcov/*"
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: release.zip

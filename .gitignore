@@ -1,0 +1,62 @@
+# =============================================================================
+# .gitignore — AI Triage Agentic System
+# =============================================================================
+# PATIENT DATA SAFETY: data/raw/ is gitignored to prevent accidental
+# commit of MIMIC or UHL patient data. data/processed/ sample files
+# from the public demo dataset ARE committed as they contain no real PHI.
+# =============================================================================
+
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Environment — NEVER commit .env
+.env
+
+# Raw data — NEVER commit patient/UHL/MIMIC data.
+# The only raw file allowed in git for this research demo is the public Kaggle KTAS CSV.
+data/raw/*
+!data/raw/kaggle_ktas/
+!data/raw/kaggle_ktas/data.csv
+data/raw/mimic-iv-ed*/
+data/raw/mimic-iv-ed-demo*/
+data/raw/uhl*/
+
+# ML model artefacts — block by default, allow the small public KTAS demo models needed by Azure.
+data/models/*
+!data/models/registry.json
+!data/models/RandomForest_ktas_5class.pkl
+!data/models/RandomForest_ktas_emergency.pkl
+
+# IDE
+.vscode/settings.json
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test coverage
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Azure
+*.azurewebsites.net
+local.settings.json
+
+# Logs
+*.log
+logs/
